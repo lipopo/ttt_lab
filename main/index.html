@@ -1,0 +1,154 @@
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html;charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="shortcut icon" href="./assets/icons/icon.png" type="image/x-icon">
+        <!--导入vue.js-->
+        <script src="https://unpkg.com/vue"></script>
+        <!--导入bootstrap-->
+        <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
+        <script src="./assets/css/bootstrap-theme.min.css"></script>
+        <!--导入jquery-->
+        <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+
+        <title>田田小吃货</title>
+        
+    </head>
+    <body>
+        <div id="app">
+
+            <div class="container">
+                <div class="row">
+                    <table class="table" >
+                        <thead>
+                            <th>地点</th>
+                            <th>删除</th>
+                            <th>改变状态</th>
+                            <th>状态</th>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in select">
+                                <th>{{item.store_name}}</th>
+                                <th><button class="btn btn-default" @click="del_data(item.store_id)">x</button></th>
+                                <th><button class="btn btn-default" @click="change_status(item)">Change Status!</button></th>
+                                <th>
+                                    <input name="checsssk" v-model="item.choose" type="checkbox"/>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-12 col-sm-12">
+                            <button class="btn btn-default btn-block" @click="choose_data" v-if="select_is_not_null">今天{{lg_select}}约我去{{data_choose.store_name}}吃饭</button>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="form-group ">
+                            <div class="col-xs-6 col-sm-8 col-md-10">
+                                <input type="text" class="form-control" placeholder="请输入商店名称" v-model="store_add"/>
+                            </div>
+                            <div class="col-xs-6 col-sm-4 col-md-2">
+                                <button class="btn btn-default btn-block" @click="add_data">添加数据</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-xs-8 col-sm-8 col-md-8"> 
+                            <select v-model="lg_select" class="form-control">
+                                <option v-for="name in names">{{name}}</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-4 col-sm-4 col-md-4">
+                            <button @click="choose_img" class="btn btn-default btn-block">选老公</button>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <img :src="src_select" class="img-responsive"/>
+                    </div>
+                    <!--<img :src="img_src" />
+                    <button @click="change_img" class="btn btn-default btn-block">改变图形</button>
+                    -->            
+                </div>
+            </div>    
+            <!--
+            <p>{{id_array}}</p>
+            -->
+            </div>
+        <!--导入bootstrap.js-->
+        <script src="./assets/js/bootstrap.min.js"></script>
+        <script>
+            var app = new Vue({
+                el:"#app",
+                data:{
+                    message:null,
+                    select:null,
+                    store_add:null,
+                    choose_id:0,
+                    seed:0,
+                    img_seed:0,
+                    interval_00:null,
+                    interval_01:null,
+                    name:"二宫和也",
+                    src:[
+                        "./assets/imgs/songbenrun.jpg",
+                        "./assets/imgs/ergongheye.jpg",
+                        "./assets/imgs/yafei.jpg",
+                        "./assets/imgs/xiang.jpg",
+                        "./assets/imgs/dayazhi.jpg"
+                    ],
+                    names:[
+                        "润くん",
+                        "二宫和也",
+                        "Aiba酱",
+                        "翔くん",
+                        "大野智"
+                    ],
+                    img_id:0
+                },
+                methods:{
+                    add_data:function(){if(app.store_add!=null){$.get("./py-cgi/sql.py?type=insert&table=stores&data={\"keys\":[\"store_name\"],\"values\":[\""+app.store_add+"\"]}",function(data){commit_data();app.message=data;app.store_add=null;});}},
+                    del_data:function(id){$.get("./py-cgi/sql.py?type=delete&table=stores&data={\"choose\":\"store_id\",\"choose_\":\""+id+"\"}",function(data,status){commit_data();})},
+                    change_status:function(item){item["choose"] = !item["choose"];},
+
+                    choose_data:function(){this.choose_id = 0;this.interval_00 = setInterval(this.change_data,50);},
+                    change_data:function(){this.choose_id += 1;if(this.choose_id >= 49){clearInterval(this.interval_00);this.seed += 1;this.interval_00=null;}},
+
+                    id_array:function(){if(this.select != null){use = [];this.select.filter(function(data){return data.choose == true;}).forEach(function(data){use.push(data.store_id);});return use;}},
+
+                    choose_img:function(){this.img_id = 0;this.interval_01 = setInterval(this.change_img,50);},
+                    change_img:function(){this.img_id += 1;if(this.img_id >= 49){clearInterval(this.interval_01);this.img_seed += 1;this.interval_01=null;}}
+                },
+                computed:{
+                    data_use:function(){if(this.select!=null){return this.select.filter(function(data){return data.choose == true;});}else{return null;}},
+                    array_random:function(){if(this.select!=null){use2 = [];a = this.seed;len_ = this.id_array().length;for(var i = 0;i < 50;i++){use2.push(parseInt(Math.random()*len_));};return use2;}},
+                    data_choose:function(){id = this.choose_id;return this.data_use[this.array_random[id]];},
+                    select_is_not_null:function(){return this.select != null;},
+                    lg_random:function(){use=[];a = this.img_seed;len_ = this.src.length;for(var i = 0;i < 50;i++){use.push(parseInt(Math.random()*len_));};return use;},
+                    src_select:function(){id = this.lg_random[this.img_id];return this.src[id];},
+                    lg_select:function(){id = this.lg_random[this.img_id];return this.names[id];}
+                }
+            });
+
+            function commit_data(){
+                $.get("./py-cgi/sql.py?type=select&table=stores",function(data,status){
+                    app.select = [];
+                    JSON.parse(data).forEach(function(data){
+                        data["choose"] = true;
+                        app.select.push(data);
+                    });
+
+                });
+            }
+            function getImg(){
+
+            }
+            commit_data();
+          
+        </script>
+    </body>
+</html>
