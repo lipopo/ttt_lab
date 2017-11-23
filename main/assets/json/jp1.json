@@ -1,0 +1,9 @@
+{
+            "server":"103.88.47.102",
+                "server_port":51806,
+                    "local_port":1088,
+                        "password":"i6g6YR",
+                            "timeout":60,
+                                "method":"aes-256-cfb"
+}
+
